@@ -1,5 +1,57 @@
-# Vue 3 + Vite
+# Lifecycle hooks (Composition API)
+```ts
+import {
+  defineComponent,
+  ref,
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUnmounted
+} from 'vue';
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+export default defineComponent({
+  name: 'LifecycleDemo',
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+  setup() {
+    const count = ref(0);
+
+    console.log('setup()');
+
+    onBeforeMount(() => {
+      console.log('beforeMount');
+    });
+
+    onMounted(() => {
+      console.log('mounted');
+    });
+
+    onBeforeUpdate(() => {
+      console.log('beforeUpdate');
+    });
+
+    onUpdated(() => {
+      console.log('updated');
+    });
+
+    onBeforeUnmount(() => {
+      console.log('beforeUnmount');
+    });
+
+    onUnmounted(() => {
+      console.log('unmounted');
+    });
+
+    const increment = () => {
+      count.value++;
+    };
+
+    return {
+      count,
+      increment
+    };
+  }
+});
+
+```
