@@ -1,0 +1,16 @@
+<div class="todo-item" :class="{ 'completed': todo.completed }">
+  <label class="checkbox-container">
+    <input 
+      type="checkbox" 
+      :checked="todo.completed"
+      @change="todoStore.toggleTodo(todo.id)"
+    >
+    <span class="checkmark"></span>
+  </label>
+  
+  <span class="todo-text">{{ todo.text }}</span>
+  
+  <button @click="todoStore.removeTodo(todo.id)" class="delete-btn" aria-label="Delete">
+    &times;
+  </button>
+</div>
