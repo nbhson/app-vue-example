@@ -1,0 +1,131 @@
+<script setup lang="ts">
+import { useTodoStore } from '../stores/todo'
+import type { Todo } from '../types'
+
+const props = defineProps<{
+  todo: Todo
+}>()
+
+const todoStore = useTodoStore()
+</script>
+
+<template>
+  <div class="todo-item" :class="{ 'completed': todo.completed }">
+    <label class="checkbox-container">
+      <input 
+        type="checkbox" 
+        :checked="todo.completed"
+        @change="todoStore.toggleTodo(todo.id)"
+      >
+      <span class="checkmark"></span>
+    </label>
+    
+    <span class="todo-text">{{ todo.text }}</span>
+    
+    <button @click="todoStore.removeTodo(todo.id)" class="delete-btn" aria-label="Delete">
+      &times;
+    </button>
+  </div>
+</template>
+
+<style scoped>
+.todo-item {
+  display: flex;
+  align-items: center;
+  background: var(--color-white);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.todo-item.completed {
+  opacity: 0.7;
+}
+
+.todo-item.completed .todo-text {
+  text-decoration: line-through;
+  color: var(--color-gray);
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  height: 22px;
+  width: 22px;
+  background-color: #eee;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #e0e0e0;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: var(--color-secondary);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.todo-text {
+  flex: 1;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  color: var(--color-text);
+  transition: color 0.2s;
+}
+
+.delete-btn {
+  color: var(--color-gray);
+  font-size: 1.5rem;
+  padding: 0 0.5rem;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  color: var(--color-danger);
+  background-color: rgba(231, 76, 60, 0.1);
+}
+</style>
