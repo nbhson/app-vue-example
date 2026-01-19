@@ -1,7 +1,7 @@
-import type { UserState } from '../../types'
+import type { UserState } from '../../types';
 
 export default (): UserState => ({
-    users: [],
-    loading: false,
-    error: null
-})
+  users: [],
+  loading: false,
+  error: null
+});

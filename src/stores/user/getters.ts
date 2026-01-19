@@ -1,5 +1,5 @@
-import type { UserState } from '../../types'
+import type { UserState } from '../../types';
 
 export default {
-    userCount: (state: UserState) => state.users.length
-}
+  userCount: (state: UserState) => state.users.length
+};

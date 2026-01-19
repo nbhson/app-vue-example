@@ -1,4 +1,9 @@
-<template src="./App/App.html"></template>
-<script lang="ts" src="./App/App.ts"></script>
-<style scoped src="./App/App.css"></style>
+<script setup lang="ts">
+import { RouterView } from 'vue-router';
+</script>
 
+<template>
+  <RouterView />
+</template>
+
+<style scoped></style>

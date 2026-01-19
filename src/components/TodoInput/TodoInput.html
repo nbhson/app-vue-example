@@ -1,8 +1,8 @@
 <div class="input-wrapper">
-  <input 
-    v-model="newTodo" 
+  <input
+    v-model="newTodo"
     @keyup.enter="handleSubmit"
-    type="text" 
+    type="text"
     placeholder="Add a new task..."
     :disabled="todoStore.loading"
   />

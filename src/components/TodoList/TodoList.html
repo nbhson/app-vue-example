@@ -1,13 +1,7 @@
 <div class="todo-list">
   <TransitionGroup name="list">
-    <TodoItem 
-      v-for="todo in todos" 
-      :key="todo.id" 
-      :todo="todo" 
-    />
+    <TodoItem v-for="todo in todos" :key="todo.id" :todo="todo" />
   </TransitionGroup>
-  
-  <div v-if="todos.length === 0" class="empty-state">
-    No tasks found.
-  </div>
+
+  <div v-if="todos.length === 0" class="empty-state">No tasks found.</div>
 </div>
