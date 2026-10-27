@@ -1,7 +1,7 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
 
 const apiClient = axios.create({
-  baseURL: (import.meta as any).env.VITE_API_BASE_URL || 'https://jsonplaceholder.typicode.com',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://jsonplaceholder.typicode.com',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json'
@@ -15,7 +15,6 @@ apiClient.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   error => Promise.reject(error)
