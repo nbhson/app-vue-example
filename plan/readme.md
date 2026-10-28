@@ -31,3 +31,48 @@
 
 ### Vòng 1
 - Self-review: (1) fallback id âm đi kèm guard trong `toggleTodo` (client-only todo không gọi server) và `removeTodo` — remove gọi DELETE `/todos/-...` sẽ fail 404 rồi filter local vẫn chạy; chấp nhận vì demo API luôn trả id. (2) CSP `connect-src` thêm `VITE_API_BASE_URL` khi override — hiện hardcode jsonplaceholder khớp default; nếu đổi API cần sửa CSP (ghi trong comment). Token regex chỉ chấp nhận JWT/opaque chars hợp lệ, chặn newline/CRLF injection vào header.
+
+## Round 2 — 2026-10-29
+
+### Findings (review đợt 2)
+
+| # | Severity | Vị trí | Vấn đề | Fix |
+|---|----------|--------|--------|-----|
+| 1 | MAJOR | src/components/*, src/views/* | Pattern `.vue` wrapper + `.ts/.html/.css` riêng: non-idiomatic, props không khai báo (TodoItem dùng `todo` trong template mà `setup()` không expose), mất type-check props/emits, khó maintain | Gộp thành SFC `<script setup lang="ts">` idiom chuẩn; xoá các thư mục tách file |
+| 2 | MAJOR | stores/*/actions.ts | `userMessage()` copy 2 nơi, logic khác nhau (todo map network/404, user không) — drift | Extract `src/utils/errors.ts` dùng chung |
+| 3 | MAJOR UX | stores/todo/actions.ts + HomeView | `addTodo` bật `loading` → HomeView thay TOÀN BỘ list bằng spinner mỗi lần thêm task; input bị disable khi đang fetch ban đầu | Tách `loading` (fetch lần đầu) khỏi `busy` (mutation); list luôn hiển thị |
+| 4 | MINOR bug | stores/todo/actions.ts `removeTodo` | Todo client-only (id ≤ 0): DELETE `/todos/-…` → 404 → hiện error dù remove local hợp lệ (mirror guard của toggle đã có từ V1) | Guard id ≤ 0: remove local, không gọi server |
+| 5 | MINOR | router/index.ts | Không có catch-all 404; không set document.title theo route | NotFoundView + `meta.title` + afterEach hook |
+| 6 | MINOR | App.vue | RouterView trần trụi — không nav, không skip-link, không focus management | App shell: header nav (active state), skip-link a11y |
+| 7 | MINOR | style.css + *.css | Hard-code màu (#fff, #eee, #e0e0e0…) rải rác → không theme được; spinner/error-state CSS copy 3 nơi | Design tokens (spacing/radius/color/typography) + dark scheme `[data-theme]`; component hoá spinner/error/empty |
+| 8 | MINOR | a11y | Filter buttons thiếu `aria-pressed`; custom checkbox không có focus-visible; input không có label/aria; transition không tôn trọng `prefers-reduced-motion` | A11y pass toàn app |
+| 9 | MINOR | env.d.ts | `declare module '*.vue'` shim mọi component thành `any` → tắt type-check import | Bỏ shim, type-check bằng vue-tsc |
+
+### Plan Round 2
+
+1. Refactor SFC: gộp TodoInput/TodoItem/TodoList/HomeView/UserView/AboutView thành SFC script setup, xoá folder tách file.
+2. Dedupe: `src/utils/errors.ts`; composables `useTheme` (dark mode persist + prefers-color-scheme), `useDocTitle`.
+3. UX fixes: tách `busy`/`loading`, guard remove id ≤ 0.
+4. App shell + router: nav header, 404, route titles.
+5. UI/UX: token hoá design system (color/spacing/type), dark mode, responsive, a11y (aria, focus-visible, reduced-motion).
+6. Features: (a) dark mode toggle; (b) inline edit todo; (c) clear completed + tìm kiếm todo; (d) trang chi tiết user `/users/:id`.
+7. Tests: thêm vitest + unit test cho utils/services/stores; script `test`, `typecheck`.
+8. Verify: `npm run build`, `npm run typecheck`, `npm run test`, `npm run lint` — all green.
+
+### Trạng thái Round 2
+
+- [x] Review + plan
+- [x] SFC refactor + xoá file tách
+- [x] Dedupe error util + composables
+- [x] UX: busy/loading tách, remove guard
+- [x] App shell + router (404, title)
+- [x] Design tokens + dark mode + a11y
+- [x] Features: dark mode, inline edit, search + clear completed, user detail
+- [x] Vitest tests
+- [x] Build + test + lint + typecheck green
+- [x] Self-review final diff
+
+### Baseline (pre-round-2)
+
+- Commit `924397a`: `vite build` ✅, `tsc --noEmit` ✅, lint ✅. Không có test suite (sẽ thêm).
+
