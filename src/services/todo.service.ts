@@ -25,10 +25,21 @@ class TodoService {
     await api.patch(`/todos/${id}`, updates);
   }
 
-  private _toModel(dto: any): Todo {
+  private _toModel(dto: unknown): Todo {
+    // Validate DTO trước khi map — response bất kỳ (API đổi shape / object rác)
+    // trước đây được spread thẳng vào model: `text: undefined` vi phạm type
+    // Todo và nổ ở nơi render.
+    if (typeof dto !== 'object' || dto === null) {
+      throw new Error('Invalid todo item received from API');
+    }
+    const d = dto as Record<string, unknown>;
+    const title = typeof d.title === 'string' ? d.title : typeof d.text === 'string' ? d.text : '';
     return {
-      ...dto,
-      text: dto.title || dto.text
+      id: typeof d.id === 'number' ? d.id : 0,
+      userId: typeof d.userId === 'number' ? d.userId : 1,
+      title,
+      text: title, // Normalized title
+      completed: d.completed === true
     };
   }
 }

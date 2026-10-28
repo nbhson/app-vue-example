@@ -4,6 +4,7 @@
     @keyup.enter="handleSubmit"
     type="text"
     placeholder="Add a new task..."
+    maxlength="200"
     :disabled="todoStore.loading"
   />
   <button @click="handleSubmit" class="add-btn" :disabled="todoStore.loading">

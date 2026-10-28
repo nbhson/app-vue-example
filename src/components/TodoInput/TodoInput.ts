@@ -8,8 +8,9 @@ export default defineComponent({
     const newTodo = ref('');
 
     const handleSubmit = () => {
-      if (newTodo.value.trim()) {
-        todoStore.addTodo(newTodo.value);
+      const text = newTodo.value.trim().slice(0, 200);
+      if (text) {
+        todoStore.addTodo(text);
         newTodo.value = '';
       }
     };

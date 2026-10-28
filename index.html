@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      CSP defense-in-depth: SPA chỉ cần script/style của chính nó + kết nối tới
+      API demo. `unsafe-inline` cho style là yêu cầu của Vue runtime (binding
+      style); script KHÔNG có unsafe-inline.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://jsonplaceholder.typicode.com; img-src 'self' data:; object-src 'none'; base-uri 'self'"
+    />
     <title>vue-project</title>
   </head>
   <body>
