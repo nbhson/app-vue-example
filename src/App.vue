@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { useTheme } from './composables/useTheme';
 
 const { theme, toggle } = useTheme();
@@ -9,6 +9,12 @@ const navItems = [
   { to: '/users', label: 'Users' },
   { to: '/about', label: 'Statistics' }
 ];
+
+const route = useRoute();
+/* "/" chỉ active trên "/", các route khác match theo prefix (/users/:id). */
+function isActive(to: string): boolean {
+  return route.path === to || (to !== '/' && route.path.startsWith(to));
+}
 </script>
 
 <template>
@@ -21,7 +27,14 @@ const navItems = [
     </RouterLink>
 
     <nav class="app-nav" aria-label="Primary">
-      <RouterLink v-for="item in navItems" :key="item.to" :to="item.to" class="nav-link">
+      <RouterLink
+        v-for="item in navItems"
+        :key="item.to"
+        :to="item.to"
+        class="nav-link"
+        :class="{ active: isActive(item.to) }"
+        :aria-current="isActive(item.to) ? 'page' : undefined"
+      >
         {{ item.label }}
       </RouterLink>
     </nav>
@@ -101,9 +114,8 @@ const navItems = [
   opacity: 1;
 }
 
-/* RouterLink active classes — exact for "/", prefix for children (/users/:id). */
-.nav-link.router-link-active,
-.nav-link.router-link-exact-active {
+/* Active state computed thủ công: router-link-active trên "/" match mọi route. */
+.nav-link.active {
   background: var(--color-primary);
   color: var(--color-on-primary);
 }

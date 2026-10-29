@@ -28,6 +28,7 @@ const remaining = computed(() => MAX_LENGTH - newTodo.value.length);
       placeholder="Add a new task..."
       :maxlength="MAX_LENGTH"
       :disabled="todoStore.busy"
+      aria-describedby="todo-char-count"
     />
     <button type="submit" class="add-btn" :disabled="todoStore.busy" aria-label="Add task">
       <span class="icon" aria-hidden="true">+</span>
