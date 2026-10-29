@@ -1,5 +1,5 @@
 import todoService from '../../services/todo.service';
-import type { Todo, TodoState } from '../../types';
+import type { TodoState } from '../../types';
 
 /** Shape tối thiểu của store — thay cho `this: any` (mất toàn bộ type check). */
 interface TodoStoreLike extends TodoState {
