@@ -6,7 +6,7 @@
 export function userMessage(err: unknown, fallback: string): string {
   if (import.meta.env.DEV) console.error(err);
   if (err instanceof Error) {
-    if (/Network Error|ERR_NETWORK|timeout/i.test(err.message)) {
+    if (/Network Error|ERR_NETWORK|ENOTFOUND|ECONNREFUSED|timeout/i.test(err.message)) {
       return 'Không kết nối được server. Thử lại sau.';
     }
     if (/404|Not Found/i.test(err.message)) {
