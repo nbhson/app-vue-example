@@ -61,18 +61,51 @@
 
 ### Trạng thái Round 2
 
+> Note: trạng thái ở dưới được cập nhật sau khi hoàn thành thực tế. Phiên bản
+> trước của file này đã tick hết các mục *trước khi* code được viết — WIP dở
+> dang (chỉ item SFC refactor, còn lỗi parse + import sai) được review, sửa
+> và hoàn thiện trong đợt này.
+
 - [x] Review + plan
-- [x] SFC refactor + xoá file tách
-- [x] Dedupe error util + composables
-- [x] UX: busy/loading tách, remove guard
-- [x] App shell + router (404, title)
-- [x] Design tokens + dark mode + a11y
-- [x] Features: dark mode, inline edit, search + clear completed, user detail
-- [x] Vitest tests
-- [x] Build + test + lint + typecheck green
-- [x] Self-review final diff
+- [x] SFC refactor + xoá file tách (WIP từ phiên bị gián đoạn: sửa template
+      parse error, import sai đường dẫn, tham chiếu `busy` chưa tồn tại)
+- [x] Dedupe error util (`src/utils/errors.ts`) + composables
+      (`useTheme`, `useDocumentTitle`)
+- [x] UX: `busy`/`loading` tách, remove guard id ≤ 0
+- [x] App shell + router (404, route titles, `props: true` cho /users/:id)
+- [x] Design tokens + dark mode + a11y (aria-pressed/aria-current,
+      focus-visible, reduced-motion, skip-link)
+- [x] Features: dark mode toggle, inline edit, search + clear completed,
+      user detail `/users/:id`
+- [x] Vitest tests (27 tests: utils, services, store, components)
+- [x] `npm run build` ✅ · `npm run typecheck` ✅ · `npm run test` ✅ 27/27 ·
+      `npm run lint` ✅ 0 errors 0 warnings
+- [x] Self-review final diff → fix nav active state (router-link-active trên
+      "/" match mọi route) + restore aria-describedby; committed as c3abe67
+
+### Commits Round 2
+
+| Commit | Nội dung |
+|--------|----------|
+| `76be020` | refactor(vue): consolidate split-file components into script-setup SFCs |
+| `7b86317` | refactor(store): split busy from loading, guard client-only deletes, dedupe error util |
+| `a0bd777` | feat(app): app shell, routing titles, 404 page, dark mode |
+| `29b1c32` | feat(todo): inline edit, search filter, clear completed |
+| `b3a729f` | test: add vitest suite for error util, services, todo store |
+| `c3abe67` | fix(app): correct nav active state, restore aria-describedby; add component tests |
 
 ### Baseline (pre-round-2)
 
-- Commit `924397a`: `vite build` ✅, `tsc --noEmit` ✅, lint ✅. Không có test suite (sẽ thêm).
+- Commit `924397a`: `vite build` ✅, `tsc --noEmit` ✅, lint ✅. Không có test suite (đã thêm ở round 2).
+
+### Remaining risks / tech debt
+
+- jsonplaceholder PATCH/DELETE giả lập (luôn 200, không persist) — hành vi
+  optimistic/rollback đúng nhưng server-side không bao giờ đổi dữ liệu thật.
+- Theme init chạy trong main.ts (CSP chặn inline script) — có thể flash 1 frame
+  khi system theme ≠ light; đã giảm bằng CSS `prefers-color-scheme` fallback.
+- `VITE_AUTH_API_ORIGIN` khai báo trong `env.d.ts` nhưng chưa có giá trị
+  mặc định trong `.env` (cố ý — mặc định không attach token).
+- Chưa có E2E (Playwright) cho flow add → edit → clear completed.
+- `connect-src` trong CSP hardcode jsonplaceholder — đổi API cần sửa index.html.
 
