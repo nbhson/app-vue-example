@@ -6,15 +6,10 @@ import TodoList from '../components/TodoList.vue';
 
 const todoStore = useTodoStore();
 const filter = ref<'all' | 'active' | 'completed'>('all');
+const search = ref('');
 
 onMounted(() => {
   if (todoStore.totalCount === 0) void todoStore.fetchTodos();
-});
-
-const filteredTodos = computed(() => {
-  if (filter.value === 'active') return todoStore.incompleteTodos;
-  if (filter.value === 'completed') return todoStore.finishedTodos;
-  return todoStore.todos.slice().reverse();
 });
 
 const filters: Array<{ value: 'all' | 'active' | 'completed'; label: string }> = [
@@ -22,12 +17,40 @@ const filters: Array<{ value: 'all' | 'active' | 'completed'; label: string }> =
   { value: 'active', label: 'Active' },
   { value: 'completed', label: 'Completed' }
 ];
+
+const filteredTodos = computed(() => {
+  let list: typeof todoStore.todos;
+  if (filter.value === 'active') list = todoStore.incompleteTodos;
+  else if (filter.value === 'completed') list = todoStore.finishedTodos;
+  else list = todoStore.todos.slice().reverse(); // newest first
+
+  const query = search.value.trim().toLowerCase();
+  if (query) {
+    list = list.filter(t => t.text.toLowerCase().includes(query));
+  }
+  return list;
+});
+
+const isSearching = computed(() => search.value.trim().length > 0);
+const emptyMessage = computed(() =>
+  isSearching.value
+    ? 'No tasks match your search.'
+    : filter.value === 'completed'
+      ? 'No completed tasks yet.'
+      : filter.value === 'active'
+        ? 'All tasks are done — nice work!'
+        : 'No tasks yet. Add your first one above.'
+);
+
+function clearCompleted() {
+  void todoStore.clearCompleted();
+}
 </script>
 
 <template>
-  <main class="home-view">
+  <section class="home-view" aria-labelledby="tasks-heading">
     <header class="header">
-      <h1>My Tasks</h1>
+      <h1 id="tasks-heading">My Tasks</h1>
       <div class="stats" aria-live="polite">
         <span>{{ todoStore.doneCount }} / {{ todoStore.totalCount }} done</span>
       </div>
@@ -35,15 +58,48 @@ const filters: Array<{ value: 'all' | 'active' | 'completed'; label: string }> =
 
     <TodoInput />
 
-    <div class="filters" role="group" aria-label="Filter tasks">
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Filter tasks">
+        <button
+          v-for="f in filters"
+          :key="f.value"
+          type="button"
+          :class="{ active: filter === f.value }"
+          :aria-pressed="filter === f.value"
+          @click="filter = f.value"
+        >
+          {{ f.label }}
+        </button>
+      </div>
+
+      <div class="search-wrapper">
+        <label class="visually-hidden" for="todo-search">Search tasks</label>
+        <input
+          id="todo-search"
+          v-model="search"
+          type="search"
+          placeholder="Search tasks..."
+          autocomplete="off"
+        />
+        <button
+          v-if="isSearching"
+          type="button"
+          class="clear-search"
+          aria-label="Clear search"
+          @click="search = ''"
+        >
+          &times;
+        </button>
+      </div>
+
       <button
-        v-for="f in filters"
-        :key="f.value"
-        :class="{ active: filter === f.value }"
-        :aria-pressed="filter === f.value"
-        @click="filter = f.value"
+        v-if="todoStore.doneCount > 0"
+        type="button"
+        class="clear-completed"
+        :disabled="todoStore.busy"
+        @click="clearCompleted"
       >
-        {{ f.label }}
+        Clear completed ({{ todoStore.doneCount }})
       </button>
     </div>
 
@@ -57,30 +113,25 @@ const filters: Array<{ value: 'all' | 'active' | 'completed'; label: string }> =
       <button class="retry-btn" @click="todoStore.fetchTodos()">Retry</button>
     </div>
 
-    <TodoList v-else :todos="filteredTodos" />
-
-    <nav class="footer-link" aria-label="Secondary">
-      <RouterLink to="/about">About</RouterLink>
-      <span aria-hidden="true">·</span>
-      <RouterLink to="/users">Manage Users</RouterLink>
-    </nav>
-  </main>
+    <TodoList v-else :todos="filteredTodos" :empty-message="emptyMessage" />
+  </section>
 </template>
 
 <style scoped>
 .home-view {
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-6);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 h1 {
-  font-size: 2.25rem;
+  font-size: var(--fs-2xl);
   font-weight: 700;
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   -webkit-background-clip: text;
@@ -94,27 +145,34 @@ h1 {
 }
 
 .stats {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--color-muted);
   font-weight: 600;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  padding: 0.3rem 0.8rem;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
 .filters {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-2);
 }
 
 .filters button {
-  padding: 0.5rem 1rem;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-weight: 500;
   color: var(--color-muted);
@@ -132,21 +190,86 @@ h1 {
   box-shadow: var(--shadow-sm);
 }
 
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 140px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  padding-right: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+}
+
+.search-wrapper input::placeholder {
+  color: var(--color-muted);
+}
+
+.clear-search {
+  position: absolute;
+  right: var(--space-2);
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+}
+
+.clear-search:hover {
+  color: var(--color-text);
+}
+
+.clear-completed {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  color: var(--color-danger);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+
+.clear-completed:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.clear-completed:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .retry-btn {
-  margin-top: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-weight: 600;
 }
 
-.footer-link {
-  margin-top: 3rem;
-  text-align: center;
-  font-size: 0.9rem;
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
+@media (max-width: 560px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clear-completed {
+    align-self: flex-start;
+  }
 }
 </style>

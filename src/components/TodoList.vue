@@ -2,7 +2,9 @@
 import TodoItem from './TodoItem.vue';
 import type { Todo } from '../types';
 
-defineProps<{ todos: Todo[] }>();
+withDefaults(defineProps<{ todos: Todo[]; emptyMessage?: string }>(), {
+  emptyMessage: 'No tasks found.'
+});
 </script>
 
 <template>
@@ -14,7 +16,7 @@ defineProps<{ todos: Todo[] }>();
     </TransitionGroup>
 
     <div v-if="todos.length === 0" class="state-block empty-state" role="status">
-      No tasks found.
+      {{ emptyMessage }}
     </div>
   </div>
 </template>

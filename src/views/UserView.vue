@@ -41,10 +41,6 @@ onMounted(() => {
         </div>
       </RouterLink>
     </div>
-
-    <nav class="back-link" aria-label="Secondary">
-      <RouterLink to="/">Back to Todos</RouterLink>
-    </nav>
   </main>
 </template>
 
@@ -135,11 +131,6 @@ h1 {
   color: var(--color-primary);
   font-weight: 500;
   margin-top: 0.2rem;
-}
-
-.back-link {
-  text-align: center;
-  margin-top: 2rem;
 }
 
 .retry-btn {

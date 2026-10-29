@@ -1,14 +1,37 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useTodoStore } from '../stores/todo';
 import type { Todo } from '../types';
 
 const props = defineProps<{ todo: Todo }>();
 
 const todoStore = useTodoStore();
+
+const editing = ref(false);
+const draft = ref('');
+const editInput = ref<HTMLInputElement | null>(null);
+
 const toggleLabel = computed(
   () => `Mark "${props.todo.text}" as ${props.todo.completed ? 'active' : 'completed'}`
 );
+
+async function startEdit() {
+  draft.value = props.todo.text;
+  editing.value = true;
+  await nextTick();
+  editInput.value?.focus();
+  editInput.value?.select();
+}
+
+function saveEdit() {
+  if (!editing.value) return;
+  void todoStore.updateTodoText(props.todo.id, draft.value);
+  editing.value = false;
+}
+
+function cancelEdit() {
+  editing.value = false;
+}
 
 function toggle() {
   void todoStore.toggleTodo(props.todo.id);
@@ -21,7 +44,7 @@ function remove() {
 
 <template>
   <div class="todo-item" :class="{ completed: todo.completed }">
-    <label class="checkbox-container">
+    <label v-if="!editing" class="checkbox-container">
       <input
         type="checkbox"
         :checked="todo.completed"
@@ -31,11 +54,28 @@ function remove() {
       <span class="checkmark" aria-hidden="true"></span>
     </label>
 
-    <span class="todo-text">{{ todo.text }}</span>
+    <input
+      v-if="editing"
+      ref="editInput"
+      v-model="draft"
+      class="edit-input"
+      type="text"
+      maxlength="200"
+      aria-label="Edit task text"
+      @keyup.enter="saveEdit"
+      @keyup.esc="cancelEdit"
+      @blur="saveEdit"
+    />
+    <span v-else class="todo-text">{{ todo.text }}</span>
 
-    <button class="delete-btn" aria-label="Delete task" @click="remove">
-      &times;
-    </button>
+    <div v-if="!editing" class="item-actions">
+      <button class="icon-btn" aria-label="Edit task" @click="startEdit">✎</button>
+      <button class="icon-btn" aria-label="Delete task" @click="remove">&times;</button>
+    </div>
+    <div v-else class="item-actions">
+      <button class="save-btn" @mousedown.prevent="saveEdit">Save</button>
+      <button class="cancel-btn" @mousedown.prevent="cancelEdit">Cancel</button>
+    </div>
   </div>
 </template>
 
@@ -43,12 +83,13 @@ function remove() {
 .todo-item {
   display: flex;
   align-items: center;
+  gap: var(--space-3);
   background: var(--color-surface);
   padding: var(--space-4);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border);
-  margin-bottom: 0.8rem;
+  margin-bottom: var(--space-2);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -76,6 +117,7 @@ function remove() {
   padding-left: 30px;
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .checkbox-container input {
@@ -126,34 +168,79 @@ function remove() {
   top: 4px;
   width: 5px;
   height: 10px;
-  border: solid white;
+  border: solid var(--color-on-primary);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-[data-theme='dark'] .checkbox-container input:checked ~ .checkmark:after {
-  border-color: var(--color-on-primary);
-}
-
 .todo-text {
   flex: 1;
-  margin-left: 0.5rem;
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--color-text);
   transition: color 0.2s;
   overflow-wrap: anywhere;
 }
 
-.delete-btn {
+/* Inline edit input mirrors the item box for a seamless swap */
+.edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-base);
+}
+
+.edit-input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.icon-btn,
+.icon-btn {
   color: var(--color-muted);
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   line-height: 1;
-  padding: 0 0.5rem;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
 
-.delete-btn:hover {
-  color: var(--color-danger);
-  background-color: var(--color-danger-soft);
+.icon-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-alt);
+}
+
+.item-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.save-btn {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.save-btn:hover {
+  background: var(--color-primary-strong);
+}
+
+.cancel-btn {
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+}
+
+.cancel-btn:hover {
+  border-color: var(--color-muted);
 }
 </style>

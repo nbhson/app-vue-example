@@ -30,10 +30,6 @@ const stats = computed(() => [
       <p>Built with Vue 3, Vite, Pinia, and Vue Router.</p>
       <p>This is a standard project structure example.</p>
     </div>
-
-    <nav class="back-link" aria-label="Secondary">
-      <RouterLink to="/">Back to Home</RouterLink>
-    </nav>
   </main>
 </template>
 

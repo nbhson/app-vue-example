@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useTodoStore } from '../stores/todo';
 
 const todoStore = useTodoStore();
@@ -14,6 +14,8 @@ function handleSubmit() {
     newTodo.value = '';
   }
 }
+
+const remaining = computed(() => MAX_LENGTH - newTodo.value.length);
 </script>
 
 <template>
@@ -25,12 +27,15 @@ function handleSubmit() {
       type="text"
       placeholder="Add a new task..."
       :maxlength="MAX_LENGTH"
-      :disabled="todoStore.loading"
+      :disabled="todoStore.busy"
     />
-    <button type="submit" class="add-btn" :disabled="todoStore.loading" aria-label="Add task">
+    <button type="submit" class="add-btn" :disabled="todoStore.busy" aria-label="Add task">
       <span class="icon" aria-hidden="true">+</span>
     </button>
   </form>
+  <p id="todo-char-count" class="char-count" aria-live="polite">
+    {{ remaining }} characters left
+  </p>
 </template>
 
 <style scoped>
@@ -97,4 +102,12 @@ input::placeholder {
 .add-btn:active {
   transform: translateY(0);
 }
+
+.char-count {
+  margin: calc(-1 * var(--space-3)) 0 0 var(--space-4);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-align: right;
+}
+
 </style>
