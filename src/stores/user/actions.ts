@@ -1,13 +1,9 @@
 import userService from '../../services/user.service';
+import { userMessage } from '../../utils/errors';
 import type { UserState } from '../../types';
 
 interface UserStoreLike extends UserState {
   fetchUsers(): Promise<void>;
-}
-
-function userMessage(err: unknown, fallback: string): string {
-  if (import.meta.env.DEV) console.error(err);
-  return fallback;
 }
 
 export default {

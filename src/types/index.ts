@@ -32,7 +32,10 @@ export interface User {
 
 export interface TodoState {
   todos: Todo[];
+  /** Initial fetch in flight — full-list skeleton/spinner. */
   loading: boolean;
+  /** A mutation (add/toggle/remove/edit) is in flight — disable inputs, keep list visible. */
+  busy: boolean;
   error: string | null;
 }
 
