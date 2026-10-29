@@ -76,6 +76,27 @@
   color-scheme: dark;
 }
 
+/* FOUC guard: trước khi main.ts set data-theme, tôn trọng prefers-color-scheme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-alt: #334155;
+    --color-text: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-border: #334155;
+    --color-primary: #60a5fa;
+    --color-primary-strong: #93c5fd;
+    --color-on-primary: #0f172a;
+    --color-danger: #f87171;
+    --color-danger-soft: rgba(248, 113, 113, 0.15);
+    --color-focus: #93c5fd;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
