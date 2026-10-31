@@ -1,4 +1,6 @@
 # Lifecycle hooks (Composition API)
+
+[![CI](https://github.com/nbhson/app-vue-example/actions/workflows/ci.yml/badge.svg)](https://github.com/nbhson/app-vue-example/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ```ts
 import {
   defineComponent,
